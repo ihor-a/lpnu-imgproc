@@ -7,14 +7,15 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <VBox alignment="CENTER" prefHeight="615.0" prefWidth="1078.0" spacing="20.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.imgproc.MainController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-   <Pane prefHeight="578.0" prefWidth="1038.0">
+   <Pane onDragDetected="#onSaveButtonClick" prefHeight="578.0" prefWidth="1038.0">
       <children>
-          <Button layoutX="625.0" layoutY="462.0" onAction="#onExecuteButtonClick" text="Execute" />
+          <Button layoutX="625.0" layoutY="430.0" onAction="#onExecuteButtonClick" text="Execute" />
          <Button fx:id="uploadButton1" layoutY="372.0" mnemonicParsing="false" onAction="#onUploadButtonClick" text="Upload Image 1" />
          <Pane layoutX="1.0" prefHeight="355.0" prefWidth="333.0" style="-fx-border-width: 1; -fx-border-color: gray;">
             <children>
@@ -22,7 +23,7 @@
             </children>
          </Pane>
       
-                      <Label fx:id="mainLabel" alignment="CENTER" layoutX="700.0" layoutY="462.0" prefHeight="99.0" prefWidth="277.0" />
+                      <Label fx:id="mainLabel" alignment="TOP_CENTER" layoutX="703.0" layoutY="424.0" prefHeight="113.0" prefWidth="325.0" />
          <Pane layoutX="353.0" prefHeight="355.0" prefWidth="333.0" style="-fx-border-width: 1; -fx-border-color: gray;">
             <children>
                <ImageView fx:id="imageView2" fitHeight="355.0" fitWidth="333.0" pickOnBounds="true" preserveRatio="true" />
@@ -34,10 +35,16 @@
          <Button layoutX="353.0" layoutY="372.0" mnemonicParsing="false" onAction="#onUploadButtonClick" text="Upload Image 2" />
          <Button fx:id="grayscaleButton1" layoutX="119.0" layoutY="373.0" mnemonicParsing="false" onAction="#onGrayscaleButtonClick" text="To Grayscale Image 1" />
          <Button layoutX="478.0" layoutY="373.0" mnemonicParsing="false" onAction="#onGrayscaleButtonClick" text="To Grayscale Image 2" />
-         <TextField fx:id="diffThreshold" layoutX="456.0" layoutY="462.0" prefHeight="26.0" prefWidth="48.0" text="8" />
-         <Label layoutX="295.0" layoutY="462.0" prefHeight="26.0" prefWidth="101.0" text="Diff Threshold" />
-         <TextField fx:id="redValStepPerDiffPixel" layoutX="456.0" layoutY="499.0" prefHeight="26.0" prefWidth="48.0" text="10" />
-         <Label layoutX="295.0" layoutY="499.0" prefHeight="26.0" prefWidth="177.0" text="Red value per one diff pixel" />
+         <TextField fx:id="diffThreshold" layoutX="495.0" layoutY="430.0" prefHeight="26.0" prefWidth="48.0" text="8" />
+         <Label layoutX="376.0" layoutY="430.0" prefHeight="26.0" prefWidth="84.0" text="Diff Threshold" />
+         <TextField fx:id="redValStepPerDiffPixel" layoutX="495.0" layoutY="473.0" prefHeight="26.0" prefWidth="48.0" text="16" />
+         <Label layoutX="308.0" layoutY="473.0" prefHeight="26.0" prefWidth="152.0" text="Red value per one diff pixel" />
+         <Label layoutX="833.0" layoutY="389.0" prefHeight="17.0" prefWidth="74.0" text="Result">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Label>
+         <Button layoutX="622.0" layoutY="473.0" mnemonicParsing="false" onAction="#onSaveButtonClick" text="Save File" />
       </children>
    </Pane>
 </VBox>

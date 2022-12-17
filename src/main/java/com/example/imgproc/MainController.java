@@ -74,28 +74,60 @@ public class MainController {
         if (redValStep == -1) {
             return;
         }
+
         buffImage3 = new BufferedImage(buffImage1.getWidth(), buffImage1.getHeight(), BufferedImage.TYPE_INT_RGB);
         int diffIntensity, redVal;
-        Color redColor;
+        int diffPixels = 0, totalPixels = 0, cropPixels = 0;
+        int minDiffIntensity = Integer.MAX_VALUE, maxDiffIntensity = 0, sumDiffIntensity = 0;
+        Color destColor;
 
         for (int x = 0; x < buffImage1.getWidth(); x++) {
             for (int y = 0; y < buffImage1.getHeight(); y++) {
                 Color color1 = new Color(buffImage1.getRGB(x, y));
-                Color color2 = new Color(buffImage2.getRGB(x, y));
-                diffIntensity =
-                        Math.abs(color1.getRed() - color2.getRed()) +
-                        Math.abs(color1.getGreen() - color2.getGreen()) +
-                        Math.abs(color1.getBlue() - color2.getBlue())
-                ;
-                if (diffIntensity >= diffThresholdVal) {
-                    redVal = diffIntensity * redValStep;
-                    redColor = new Color(Math.min(redVal, 255), 0, 0);
-                    buffImage3.setRGB(x, y, redColor.getRGB());
+
+                // Images overlap
+                if (x < buffImage2.getWidth() && y < buffImage2.getHeight()) {
+                    Color color2 = new Color(buffImage2.getRGB(x, y));
+                    diffIntensity =
+                            Math.abs(color1.getRed() - color2.getRed()) +
+                                    Math.abs(color1.getGreen() - color2.getGreen()) +
+                                    Math.abs(color1.getBlue() - color2.getBlue())
+                    ;
+                    if (diffIntensity >= diffThresholdVal) {
+                        redVal = diffIntensity * redValStep;
+                        destColor = new Color(Math.min(redVal, 255), 0, 0);
+                        buffImage3.setRGB(x, y, destColor.getRGB());
+
+                        // Stats
+                        minDiffIntensity = Math.min(diffIntensity, minDiffIntensity);
+                        maxDiffIntensity = Math.max(diffIntensity, maxDiffIntensity);
+                        sumDiffIntensity += diffIntensity;
+                        diffPixels++;
+                    } else {
+                        buffImage3.setRGB(x, y, color1.getRGB());
+                    }
+
                 } else {
-                    buffImage3.setRGB(x, y, color1.getRGB());
+                    // Image 1 is cropped by image 2
+                    destColor = new Color(0, 0, color1.getBlue());
+                    buffImage3.setRGB(x, y, destColor.getRGB());
+                    cropPixels++;
                 }
+
+                totalPixels++;
             }
         }
+
+        // Display stats
+        mainLabel.setText(
+                String.format("Image size:   %d x %d\n", buffImage1.getWidth(), buffImage1.getHeight()) +
+                String.format("Intensity diff min / avg / max:   %d / %d / %d\n",
+                        diffPixels > 0 ? minDiffIntensity : 0,
+                        diffPixels > 0 ? sumDiffIntensity/diffPixels : 0,
+                        maxDiffIntensity
+                ) +
+                String.format("Pixels diff / cropped / total:   %d / %d / %d", diffPixels, cropPixels, totalPixels)
+        );
 
         setImage(buffImage3, imageView3);
     }
@@ -111,6 +143,25 @@ public class MainController {
             return -1;
         }
         return result;
+    }
+
+    @FXML
+    protected void onSaveButtonClick() throws IOException {
+        if (buffImage3 == null) {
+            mainLabel.setText("Please execute processing first");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save File in png format");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PNG Files", "*.png")
+        );
+        File selectedFile = fileChooser.showSaveDialog(null);
+
+        if (selectedFile != null) {
+            ImageIO.write(buffImage3, "png", selectedFile);
+        }
     }
 
     @FXML
