@@ -53,6 +53,14 @@ public class MainController {
                 redValStepPerDiffPixel.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
+//        ObservableList<String> options =
+//                FXCollections.observableArrayList(
+//                        "Option 1",
+//                        "Option 2",
+//                        "Option 3"
+//                );
+//        comboBox = new ComboBox(options);
+//        comboBox.getItems().addAll("All", "Alpha", "Red", "Green", "Blue");
     }
 
     @FXML
@@ -89,10 +97,9 @@ public class MainController {
                 if (x < buffImage2.getWidth() && y < buffImage2.getHeight()) {
                     Color color2 = new Color(buffImage2.getRGB(x, y));
                     diffIntensity =
-                            Math.abs(color1.getRed() - color2.getRed()) +
-                                    Math.abs(color1.getGreen() - color2.getGreen()) +
-                                    Math.abs(color1.getBlue() - color2.getBlue())
-                    ;
+                            Math.abs((color1.getRed() + color1.getGreen() + color1.getBlue())/3 -
+                                    (color2.getRed() + color2.getGreen() + color2.getBlue())/3
+                            );
                     if (diffIntensity >= diffThresholdVal) {
                         redVal = diffIntensity * redValStep;
                         destColor = new Color(Math.min(redVal, 255), 0, 0);
@@ -216,7 +223,6 @@ public class MainController {
                         grayRed + grayGreen + grayBlue
                 );
                 buffImage.setRGB(x, y, grayColor.getRGB());
-//                System.out.printf("%d, %d, %d%n", grayColor.getRed(), grayColor.getGreen(), grayColor.getBlue());
             }
         }
         System.out.println();
