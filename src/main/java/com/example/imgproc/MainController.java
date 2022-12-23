@@ -5,21 +5,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
+import service.ImageFileService;
+import service.ImageProcessingService;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 import static java.lang.Integer.parseInt;
 
-public class MainController {
+public class MainController implements ImageFileController {
     @FXML
     private Label mainLabel;
 
@@ -41,6 +36,19 @@ public class MainController {
     private BufferedImage buffImage2;
     private BufferedImage buffImage3;
 
+    @Override
+    public void setImageFileService(ImageFileService imageFileService) {
+        this.imageFileService = imageFileService;
+    }
+
+    @Override
+    public void setImageProcessingService(ImageProcessingService imageProcessingService) {
+        this.imageProcessingService = imageProcessingService;
+    }
+
+    private ImageFileService imageFileService;
+    private ImageProcessingService imageProcessingService;
+
     public void initialize() {
         // Allow only numeric values
         diffThreshold.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -53,14 +61,6 @@ public class MainController {
                 redValStepPerDiffPixel.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
-//        ObservableList<String> options =
-//                FXCollections.observableArrayList(
-//                        "Option 1",
-//                        "Option 2",
-//                        "Option 3"
-//                );
-//        comboBox = new ComboBox(options);
-//        comboBox.getItems().addAll("All", "Alpha", "Red", "Green", "Blue");
     }
 
     @FXML
@@ -75,68 +75,18 @@ public class MainController {
         }
 
         int diffThresholdVal = getColorLevel(diffThreshold);
-        if (diffThresholdVal == -1) {
-            return;
-        }
         int redValStep = getColorLevel(redValStepPerDiffPixel);
-        if (redValStep == -1) {
+        if (diffThresholdVal == -1 || redValStep == -1) {
             return;
         }
 
-        buffImage3 = new BufferedImage(buffImage1.getWidth(), buffImage1.getHeight(), BufferedImage.TYPE_INT_RGB);
-        int diffIntensity, redVal;
-        int diffPixels = 0, totalPixels = 0, cropPixels = 0;
-        int minDiffIntensity = Integer.MAX_VALUE, maxDiffIntensity = 0, sumDiffIntensity = 0;
-        Color destColor;
-
-        for (int x = 0; x < buffImage1.getWidth(); x++) {
-            for (int y = 0; y < buffImage1.getHeight(); y++) {
-                Color color1 = new Color(buffImage1.getRGB(x, y));
-
-                // Images overlap
-                if (x < buffImage2.getWidth() && y < buffImage2.getHeight()) {
-                    Color color2 = new Color(buffImage2.getRGB(x, y));
-                    diffIntensity =
-                            Math.abs((color1.getRed() + color1.getGreen() + color1.getBlue())/3 -
-                                    (color2.getRed() + color2.getGreen() + color2.getBlue())/3
-                            );
-                    if (diffIntensity >= diffThresholdVal) {
-                        redVal = diffIntensity * redValStep;
-                        destColor = new Color(Math.min(redVal, 255), 0, 0);
-                        buffImage3.setRGB(x, y, destColor.getRGB());
-
-                        // Stats
-                        minDiffIntensity = Math.min(diffIntensity, minDiffIntensity);
-                        maxDiffIntensity = Math.max(diffIntensity, maxDiffIntensity);
-                        sumDiffIntensity += diffIntensity;
-                        diffPixels++;
-                    } else {
-                        buffImage3.setRGB(x, y, color1.getRGB());
-                    }
-
-                } else {
-                    // Image 1 is cropped by image 2
-                    destColor = new Color(0, 0, color1.getBlue());
-                    buffImage3.setRGB(x, y, destColor.getRGB());
-                    cropPixels++;
-                }
-
-                totalPixels++;
-            }
-        }
-
-        // Display stats
-        mainLabel.setText(
-                String.format("Image size:   %d x %d\n", buffImage1.getWidth(), buffImage1.getHeight()) +
-                String.format("Intensity diff min / avg / max:   %d / %d / %d\n",
-                        diffPixels > 0 ? minDiffIntensity : 0,
-                        diffPixels > 0 ? sumDiffIntensity/diffPixels : 0,
-                        maxDiffIntensity
-                ) +
-                String.format("Pixels diff / cropped / total:   %d / %d / %d", diffPixels, cropPixels, totalPixels)
+        buffImage3 = this.imageProcessingService.compareImagesByIntensity(buffImage1,
+                buffImage2,
+                imageView3,
+                mainLabel,
+                diffThresholdVal,
+                redValStep
         );
-
-        setImage(buffImage3, imageView3);
     }
 
     private int getColorLevel(TextField textField) {
@@ -159,82 +109,24 @@ public class MainController {
             return;
         }
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save File in png format");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("PNG Files", "*.png")
-        );
-        File selectedFile = fileChooser.showSaveDialog(null);
-
-        if (selectedFile != null) {
-            ImageIO.write(buffImage3, "png", selectedFile);
-        }
+        this.imageFileService.save(buffImage3);
     }
 
     @FXML
     protected void onUploadButtonClick(ActionEvent event) throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose File. Available formats: png, jpg, bmp, tiff");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tiff")
-        );
-        File selectedFile = fileChooser.showOpenDialog(null);
-
-        if (selectedFile != null) {
-            if (event.getSource() == uploadButton1) {
-                buffImage1 = procUploadImage(selectedFile, imageView1);
-            } else {
-                buffImage2 = procUploadImage(selectedFile, imageView2);
-            }
+        if (event.getSource() == uploadButton1) {
+            buffImage1 = this.imageFileService.upload(imageView1, mainLabel);
+        } else {
+            buffImage2 = this.imageFileService.upload(imageView2, mainLabel);
         }
-    }
-
-    private BufferedImage procUploadImage(File selectedFile, ImageView imageView) throws IOException {
-        BufferedImage buffImage = ImageIO.read(selectedFile);
-        setImage(buffImage, imageView);
-        mainLabel.setText("");
-        return buffImage;
     }
 
     @FXML
     protected void onGrayscaleButtonClick(ActionEvent event) throws IOException {
         if (event.getSource() == grayscaleButton1) {
-            makeGrayscale(buffImage1, imageView1);
+            this.imageProcessingService.makeGrayscale(buffImage1, imageView1, mainLabel);
         } else {
-            makeGrayscale(buffImage2, imageView2);
+            this.imageProcessingService.makeGrayscale(buffImage2, imageView2, mainLabel);
         }
-    }
-
-    private void makeGrayscale(BufferedImage buffImage, ImageView imageView) throws IOException {
-        if (buffImage == null) {
-            mainLabel.setText("Please upload the image");
-            return;
-        }
-
-        for (int x = 0; x < buffImage.getWidth(); x++) {
-            for (int y = 0; y < buffImage.getHeight(); y++) {
-                Color origColor = new Color(buffImage.getRGB(x, y));
-                int grayRed = (int) (origColor.getRed() * 0.299);
-                int grayGreen = (int) (origColor.getGreen() * 0.587);
-                int grayBlue = (int) (origColor.getBlue() * 0.114);
-                Color grayColor = new Color(
-                        grayRed + grayGreen + grayBlue,
-                        grayRed + grayGreen + grayBlue,
-                        grayRed + grayGreen + grayBlue
-                );
-                buffImage.setRGB(x, y, grayColor.getRGB());
-            }
-        }
-        System.out.println();
-
-        setImage(buffImage, imageView);
-    }
-
-    private void setImage(BufferedImage buffImage, ImageView imageView) throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ImageIO.write(buffImage, "png", outStream);
-        imageView.setImage(
-                new Image(new ByteArrayInputStream(outStream.toByteArray()))
-        );
     }
 }
