@@ -30,7 +30,7 @@ public class MainController implements ImageFileController {
     private Button uploadButton1;
 
     @FXML private TextField diffThreshold;
-    @FXML private TextField redValStepPerDiffPixel;
+    @FXML private TextField diffColorStepPerPixel;
 
     private BufferedImage buffImage1;
     private BufferedImage buffImage2;
@@ -56,15 +56,15 @@ public class MainController implements ImageFileController {
                 diffThreshold.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
-        redValStepPerDiffPixel.textProperty().addListener((observable, oldValue, newValue) -> {
+        diffColorStepPerPixel.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                redValStepPerDiffPixel.setText(newValue.replaceAll("[^\\d]", ""));
+                diffColorStepPerPixel.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
     }
 
     @FXML
-    protected void onExecuteButtonClick() throws IOException {
+    protected void onExecuteButtonClick() {
         if (buffImage1 == null) {
             mainLabel.setText("Please upload Image 1");
             return;
@@ -75,18 +75,22 @@ public class MainController implements ImageFileController {
         }
 
         int diffThresholdVal = getColorLevel(diffThreshold);
-        int redValStep = getColorLevel(redValStepPerDiffPixel);
-        if (diffThresholdVal == -1 || redValStep == -1) {
+        int diffColorStep = getColorLevel(diffColorStepPerPixel);
+        if (diffThresholdVal == -1 || diffColorStep == -1) {
             return;
         }
 
-        buffImage3 = this.imageProcessingService.compareImagesByIntensity(buffImage1,
-                buffImage2,
-                imageView3,
-                mainLabel,
-                diffThresholdVal,
-                redValStep
-        );
+        try {
+            buffImage3 = this.imageProcessingService.compareImagesByIntensity(buffImage1,
+                    buffImage2,
+                    imageView3,
+                    mainLabel,
+                    diffThresholdVal,
+                    diffColorStep
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int getColorLevel(TextField textField) {
@@ -103,30 +107,45 @@ public class MainController implements ImageFileController {
     }
 
     @FXML
-    protected void onSaveButtonClick() throws IOException {
+    protected void onSaveButtonClick() {
         if (buffImage3 == null) {
             mainLabel.setText("Please execute processing first");
             return;
         }
 
-        this.imageFileService.save(buffImage3);
-    }
-
-    @FXML
-    protected void onUploadButtonClick(ActionEvent event) throws IOException {
-        if (event.getSource() == uploadButton1) {
-            buffImage1 = this.imageFileService.upload(imageView1, mainLabel);
-        } else {
-            buffImage2 = this.imageFileService.upload(imageView2, mainLabel);
+        try {
+            this.imageFileService.save(buffImage3);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @FXML
-    protected void onGrayscaleButtonClick(ActionEvent event) throws IOException {
-        if (event.getSource() == grayscaleButton1) {
-            this.imageProcessingService.makeGrayscale(buffImage1, imageView1, mainLabel);
-        } else {
-            this.imageProcessingService.makeGrayscale(buffImage2, imageView2, mainLabel);
+    protected void onUploadButtonClick(ActionEvent event) {
+        BufferedImage bufferedImage;
+        try {
+            if (event.getSource() == uploadButton1) {
+                bufferedImage = this.imageFileService.upload(imageView1, mainLabel);
+                buffImage1 = (bufferedImage == null) ? buffImage1 : bufferedImage;
+            } else {
+                bufferedImage = this.imageFileService.upload(imageView2, mainLabel);
+                buffImage2 = (bufferedImage == null) ? buffImage2 : bufferedImage;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    protected void onGrayscaleButtonClick(ActionEvent event) {
+        try {
+            if (event.getSource() == grayscaleButton1) {
+                this.imageProcessingService.makeGrayscale(buffImage1, imageView1, mainLabel);
+            } else {
+                this.imageProcessingService.makeGrayscale(buffImage2, imageView2, mainLabel);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

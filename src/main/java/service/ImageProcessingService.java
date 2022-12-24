@@ -7,12 +7,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public interface ImageProcessingService {
-    void makeGrayscale(BufferedImage buffImage, ImageView imageView, Label label) throws IOException;
+    void makeGrayscale(BufferedImage bufferedImage, ImageView imageView, Label label) throws IOException;
 
-    BufferedImage compareImagesByIntensity(BufferedImage buffImage1,
-                                  BufferedImage buffImage2,
+    BufferedImage compareImagesByIntensity(BufferedImage bufferedImage1,
+                                  BufferedImage bufferedImage2,
                                   ImageView imageViewRes,
                                   Label label,
                                   int diffThresholdVal,
-                                  int redValStep) throws IOException;
+                                  int diffColorStep) throws IOException;
 }

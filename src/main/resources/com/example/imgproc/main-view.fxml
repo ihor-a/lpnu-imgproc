@@ -36,9 +36,9 @@
          <Button fx:id="grayscaleButton1" layoutX="119.0" layoutY="373.0" mnemonicParsing="false" onAction="#onGrayscaleButtonClick" text="To Grayscale Image 1" />
          <Button layoutX="478.0" layoutY="373.0" mnemonicParsing="false" onAction="#onGrayscaleButtonClick" text="To Grayscale Image 2" />
          <TextField fx:id="diffThreshold" layoutX="495.0" layoutY="430.0" prefHeight="26.0" prefWidth="48.0" text="8" />
-         <Label layoutX="376.0" layoutY="430.0" prefHeight="26.0" prefWidth="84.0" text="Diff Threshold" />
-         <TextField fx:id="redValStepPerDiffPixel" layoutX="495.0" layoutY="473.0" prefHeight="26.0" prefWidth="48.0" text="16" />
-         <Label layoutX="308.0" layoutY="473.0" prefHeight="26.0" prefWidth="152.0" text="Red value per one diff pixel" />
+         <Label layoutX="372.0" layoutY="430.0" prefHeight="26.0" prefWidth="84.0" text="Diff Threshold" />
+         <TextField fx:id="diffColorStepPerPixel" layoutX="495.0" layoutY="473.0" prefHeight="26.0" prefWidth="48.0" text="16" />
+         <Label layoutX="327.0" layoutY="473.0" prefHeight="26.0" prefWidth="133.0" text="Diff color step per pixel" />
          <Label layoutX="833.0" layoutY="389.0" prefHeight="17.0" prefWidth="74.0" text="Result">
             <font>
                <Font size="14.0" />

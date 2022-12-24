@@ -8,16 +8,17 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class ImageProcessingServiceImpl extends BaseImageService implements ImageProcessingService {
+
     @Override
     public BufferedImage compareImagesByIntensity(BufferedImage bufferedImage1,
                                          BufferedImage bufferedImage2,
                                          ImageView imageViewRes,
                                          Label label,
                                          int diffThresholdVal,
-                                         int redValStep) throws IOException {
+                                         int diffColorStep) throws IOException {
 
         BufferedImage bufferedImageRes = new BufferedImage(bufferedImage1.getWidth(), bufferedImage1.getHeight(), BufferedImage.TYPE_INT_RGB);
-        int diffIntensity, redVal;
+        int diffIntensity, diffColor;
         int diffPixels = 0, totalPixels = 0, cropPixels = 0;
         int minDiffIntensity = Integer.MAX_VALUE, maxDiffIntensity = 0, sumDiffIntensity = 0;
         Color destColor;
@@ -29,13 +30,15 @@ public class ImageProcessingServiceImpl extends BaseImageService implements Imag
                 // Images overlap
                 if (x < bufferedImage2.getWidth() && y < bufferedImage2.getHeight()) {
                     Color color2 = new Color(bufferedImage2.getRGB(x, y));
-                    diffIntensity =
-                            Math.abs((color1.getRed() + color1.getGreen() + color1.getBlue())/3 -
-                                    (color2.getRed() + color2.getGreen() + color2.getBlue())/3
-                            );
+                    int intensity1 = (color1.getRed() + color1.getGreen() + color1.getBlue())/3;
+                    int intensity2 = (color2.getRed() + color2.getGreen() + color2.getBlue())/3;
+                    diffIntensity = Math.abs(intensity1 - intensity2);
+
                     if (diffIntensity >= diffThresholdVal) {
-                        redVal = diffIntensity * redValStep;
-                        destColor = new Color(Math.min(redVal, 255), 0, 0);
+                        diffColor = diffIntensity * diffColorStep;
+                        destColor = intensity1 < intensity2 ?
+                                new Color(Math.min(diffColor, 255), 0, 0) :
+                                new Color(0, Math.min(diffColor, 255), 0);
                         bufferedImageRes.setRGB(x, y, destColor.getRGB());
 
                         // Stats
