@@ -1,7 +1,7 @@
 package com.example.imgproc;
 
-import service.ImageFileService;
-import service.ImageProcessingService;
+import com.example.imgproc.service.ImageFileService;
+import com.example.imgproc.service.ImageProcessingService;
 
 public interface ImageFileController {
     void setImageFileService(ImageFileService imageFileService);

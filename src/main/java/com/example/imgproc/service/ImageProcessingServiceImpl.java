@@ -1,4 +1,4 @@
-package service;
+package com.example.imgproc.service;
 
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;

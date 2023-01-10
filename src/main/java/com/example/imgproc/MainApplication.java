@@ -13,7 +13,7 @@ public class MainApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1080, 600);
 
-        ImageServiceInjectorImpl imageServiceInjector = new ImageServiceInjectorImpl();
+        ImageServiceInjector imageServiceInjector = new ImageServiceInjectorImpl();
         imageServiceInjector.setServices(fxmlLoader.getController());
 
         stage.setTitle("MPZIP-11 Lab: Image processing");

@@ -1,7 +1,7 @@
 package com.example.imgproc;
 
-import service.ImageFileServiceImpl;
-import service.ImageProcessingServiceImpl;
+import com.example.imgproc.service.ImageFileServiceImpl;
+import com.example.imgproc.service.ImageProcessingServiceImpl;
 
 public class ImageServiceInjectorImpl implements ImageServiceInjector {
     @Override

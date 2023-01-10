@@ -6,8 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import service.ImageFileService;
-import service.ImageProcessingService;
+import com.example.imgproc.service.ImageFileService;
+import com.example.imgproc.service.ImageProcessingService;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
